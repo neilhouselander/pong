@@ -4,7 +4,11 @@
 //
 //  Created by Neil Houselander on 06/08/2017.
 //  Copyright © 2017 Neil Houselander. All rights reserved.
-//
+
+
+//STUFF TO ADD
+// GAME OVER SCENE - WHO WON & RESET
+// FIX RANDOMNESS OF BALL LAUNCH - USE THE ADD SCORE FUNCTION TO ACHIEVE
 
 import SpriteKit
 import GameplayKit
@@ -24,15 +28,11 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         
-        //run start game to set scores to zero
-        startGame()
-        
-        
+
         //link variables with spritenodes
         ball = self.childNode(withName: "ball") as! SKSpriteNode
         
         main = self.childNode(withName: "main") as! SKSpriteNode
-        
         
         enemy = self.childNode(withName: "enemy") as! SKSpriteNode
         
@@ -40,9 +40,7 @@ class GameScene: SKScene {
         topLabel = self.childNode(withName: "topLabel") as! SKLabelNode
         bottomLabel = self.childNode(withName: "bottomLabel") as! SKLabelNode
         
-        //set initial velocity and direction for the ball node
-        ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
-        
+
         //create a frame which follows the frame of the screen so we can apply physics to it
         let border = SKPhysicsBody(edgeLoopFrom: self.frame)
 
@@ -50,6 +48,9 @@ class GameScene: SKScene {
         border.restitution = 1
         
         self.physicsBody = border
+        
+        //run start game to set scores to zero
+        startGame()
         
     }
     
@@ -59,6 +60,9 @@ class GameScene: SKScene {
         
         topLabel.text = "\(score[1])"
         bottomLabel.text = "\(score[0])"
+        
+        //set initial velocity and direction for the ball node
+        ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
         
     }
     
@@ -71,15 +75,29 @@ class GameScene: SKScene {
         if playerWhoWon == main {
             
             score[0] += 1
-            ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
             
         }
+            
         else if playerWhoWon == enemy {
             
             score[1] += 1
-            ball.physicsBody?.applyImpulse(CGVector(dx: -20, dy: -20))
-            
+
         }
+        
+        //add speed depending on score - so if score for either player is 5 then speed up
+        
+        if (score[0] >= 5 && score[0] < 10 ) || (score[1] >= 5 && score[1] < 10) {
+            ball.physicsBody?.applyImpulse(CGVector(dx: 40, dy: 40))
+        }
+        
+        else if (score[0] >= 10 || score[1] >= 10) {
+            ball.physicsBody?.applyImpulse(CGVector(dx: 60, dy: 60))
+        }
+            
+        else {
+            ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
+        }
+        
         
         //update scores on screen
         topLabel.text = "\(score[1])"
@@ -94,8 +112,28 @@ class GameScene: SKScene {
         for touch in touches {
             
             let location = touch.location(in: self)
+            
             let mainMoveAction = SKAction.moveTo(x: location.x, duration: 0.1)
-            main.run(mainMoveAction)
+            
+            if currentGameType == gameType.player2 {
+                
+                if location.y > 0 {
+                    
+                    enemy.run(mainMoveAction)
+                    
+                }
+                
+                if location.y < 0 {
+                    
+                    main.run(mainMoveAction)
+                    
+                }
+            }
+            else {
+                
+                main.run(mainMoveAction)
+                
+            }
             
         }
 
@@ -106,8 +144,27 @@ class GameScene: SKScene {
         for touch in touches {
             
             let location = touch.location(in: self)
+            
             let mainMoveAction = SKAction.moveTo(x: location.x, duration: 0.1)
-            main.run(mainMoveAction)
+            
+            if currentGameType == gameType.player2 {
+                
+                if location.y > 0 {
+                    
+                    enemy.run(mainMoveAction)
+                    
+                }
+                
+                if location.y < 0 {
+                    
+                    main.run(mainMoveAction)
+                    
+                }
+            }
+            
+            else {
+                main.run(mainMoveAction)
+            }
             
         }
 
@@ -117,8 +174,34 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         
         //every time the game updates (60 times per second) run an action for the enemy paddle to track the ball
-        let enemyMoveAction = SKAction.moveTo(x: ball.position.x, duration: 0.4)
-        enemy.run(enemyMoveAction)
+        
+        switch currentGameType {
+            
+        case gameType.easy:
+            let enemyMoveAction = SKAction.moveTo(x: ball.position.x, duration: 0.8)
+            enemy.run(enemyMoveAction)
+            
+            break
+            
+        case gameType.medium:
+            let enemyMoveAction = SKAction.moveTo(x: ball.position.x, duration: 0.5)
+            enemy.run(enemyMoveAction)
+            
+            break
+            
+        case gameType.hard:
+            let enemyMoveAction = SKAction.moveTo(x: ball.position.x, duration: 0.3)
+            enemy.run(enemyMoveAction)
+            
+            break
+            
+        case gameType.player2:
+            
+            break
+            
+            
+        }
+
         
         //if the balls y position is less than main then enemy scores a point - run addScore function & pass in enemy parameter
         if ball.position.y <= main.position.y - 70 {
