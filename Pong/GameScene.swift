@@ -16,6 +16,9 @@ class GameScene: SKScene {
     var main = SKSpriteNode()
     var enemy = SKSpriteNode()
     
+    var topLabel = SKLabelNode()
+    var bottomLabel = SKLabelNode()
+    
     //score array - use rather than 2 separate variables
     var score = [Int]()
     
@@ -24,10 +27,18 @@ class GameScene: SKScene {
         //run start game to set scores to zero
         startGame()
         
+        
         //link variables with spritenodes
         ball = self.childNode(withName: "ball") as! SKSpriteNode
+        
         main = self.childNode(withName: "main") as! SKSpriteNode
+        
+        
         enemy = self.childNode(withName: "enemy") as! SKSpriteNode
+        
+        
+        topLabel = self.childNode(withName: "topLabel") as! SKLabelNode
+        bottomLabel = self.childNode(withName: "bottomLabel") as! SKLabelNode
         
         //set initial velocity and direction for the ball node
         ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
@@ -46,6 +57,8 @@ class GameScene: SKScene {
         
         score = [0,0]
         
+        topLabel.text = "\(score[1])"
+        bottomLabel.text = "\(score[0])"
         
     }
     
@@ -68,7 +81,9 @@ class GameScene: SKScene {
             
         }
         
-        print(score)
+        //update scores on screen
+        topLabel.text = "\(score[1])"
+        bottomLabel.text = "\(score[0])"
         
         
     }
